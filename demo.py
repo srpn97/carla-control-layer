@@ -125,10 +125,10 @@ def get_actor_display_name(actor, truncate=250):
 
 
 class World(object):
-    def __init__(self, carla_world, hud, actor_filter, logger):
+    def __init__(self, carla_world, hud, actor_filter):
         self.world = carla_world
         self.hud = hud
-        self.logger = logger
+        # self.logger = logger
         self.player = None
         self.camera_manager = None
         self._weather_presets = find_weather_presets()
@@ -275,25 +275,22 @@ class DualControl(object):
                     world.restart()
                 elif event.button == 1:
                     world.hud.toggle_info()
-                    world.logger.log_button_press('Square')
                 elif event.button == 2:
                     world.camera_manager.toggle_camera()
                 elif event.button == 3:
                     world.next_weather()
-                    world.logger.log_button_press('Traingle')
                 elif event.button == 9:
                     world.hud.help.toggle()
-                elif event.button == self._yes_button_idx:
-                    world.logger.log_user_response('yes')
-                elif event.button == self._no_button_idx:
-                    world.logger.log_user_response('no')
-                elif event.button == self._true_button_idx:
-                    world.logger.log_user_response('true')
-                elif event.button == self._false_button_idx:
-                    world.logger.log_user_response('false')
+                # elif event.button == self._yes_button_idx:
+                #     # world.logger.log_user_response('yes')
+                # elif event.button == self._no_button_idx:
+                #     # world.logger.log_user_response('no')
+                # elif event.button == self._true_button_idx:
+                #     world.logger.log_user_response('true')
+                # elif event.button == self._false_button_idx:
+                #     world.logger.log_user_response('false')
                 elif event.button == self._reverse_idx:
                     self._control.gear = 1 if self._control.reverse else -1
-                    world.logger.log_button_press('Reverse Left Paddle')
                 # elif event.button == 23:
                 #     world.camera_manager.next_sensor()
 
@@ -389,7 +386,7 @@ class DualControl(object):
         self._control.brake = brakeCmd
         self._control.throttle = throttleCmd
 
-        world.logger.log_control(steerCmd, throttleCmd, brakeCmd)
+        # world.logger.log_control(steerCmd, throttleCmd, brakeCmd)
         #toggle = jsButtons[self._reverse_idx]
 
         self._control.hand_brake = bool(jsButtons[self._handbrake_idx])
@@ -401,12 +398,10 @@ class DualControl(object):
         if jsButtons[self._plus_button_idx]:
             if current_time - self._plus_button_last_press > debounce_time:
                 world.hud.changeTemp(True)
-                world.logger.log_button_press('Plus')
                 self._plus_button_last_press = current_time
         elif jsButtons[self._minus_button_idx]:
             if current_time - self._minus_button_last_press > debounce_time:
                 world.hud.changeTemp(False)
-                world.logger.log_button_press('Minus')
                 self._minus_button_last_press = current_time
 
     def _parse_walker_keys(self, keys, milliseconds):
@@ -851,27 +846,24 @@ class AirConditioner(object):
 # -- CSV Logger ----------------------------------------------------------------
 # ==============================================================================
 
-class CSVLogger:
-    def __init__(self, filename):
-        self.file = open(filename, mode='w', newline='')
-        self.writer = csv.writer(self.file)
-        # Write the CSV header
-        self.writer.writerow(['timestamp', 'event_type', 'steering', 'throttle', 'brake', 'instruction', 'user_response', 'button_pressed'])
+# class CSVLogger:
+#     def __init__(self, filename):
+#         self.file = open(filename, mode='w', newline='')
+#         self.writer = csv.writer(self.file)
+#         # Write the CSV header
+#         self.writer.writerow(['timestamp', 'event_type', 'steering', 'throttle', 'brake', 'instruction', 'user_response'])
 
-    def log_control(self, steer, throttle, brake):
-        self.writer.writerow([time.time(), 'control', steer, throttle, brake, '', '', ''])
+#     def log_control(self, steer, throttle, brake):
+#         self.writer.writerow([time.time(), 'control', steer, throttle, brake, '', ''])
 
-    def log_instruction(self, text):
-        self.writer.writerow([time.time(), 'instruction', '', '', '', text, '', ''])
+#     def log_instruction(self, text):
+#         self.writer.writerow([time.time(), 'instruction', '', '', '', text, ''])
 
-    def log_user_response(self, response):
-        self.writer.writerow([time.time(), 'user_response', '', '', '', '', response, ''])
+#     def log_user_response(self, response):
+#         self.writer.writerow([time.time(), 'user_response', '', '', '', '', response])
 
-    def log_button_press(self, button):
-        self.writer.writerow([time.time(), 'button_press', '', '', '', '', '', button])
-
-    def close(self):
-        self.file.close()
+#     def close(self):
+#         self.file.close()
 
 
 # ==============================================================================
@@ -894,50 +886,17 @@ def game_loop(args, session_number):
     pygame.init()
     pygame.font.init()
     world = None
-    # session_instructions = [
-    #     [
-    #         "Turn Right at the next intersection",
-    #         "Press the Square Button on the steering wheel, to check the current speed of the vehicle and press it again to hide",
-    #         "Humans have four lungs. True or False? Press R2 for true and L2 for false on the steering wheel"
-    #     ],
-
-    #     [
-    #         "Read out the Speed Limit, only for the next sign you see", 
-    #         "Adjust AC temperature, to 64",
-    #         "Take a U - Turn whenever possible"
-    #     ],
-
-    #     [
-    #         "What is 14 + 27? Press R3 if the answer is greater than 40, or L3 if it's less than 40.", 
-    #         "Text Message Alert (Read the following text out Loud): Hey, We are waiting for you here, how much longer for you to reach?",
-    #         "The capital of France is Paris. True or False? Press R2 for True and L2 for False"
-    #     ]
-    # ]
     session_instructions = [
         [
-            "Press the right button on D-Pad but turn left at the next intersection.",
-            "Press the Square Button on the steering wheel, to check the current speed of the vehicle and press it again to hide",
-            "Humans have four lungs. True or False? Press R2 for true and L2 for false on the steering wheel",
-            "Adjust AC temperature, to 64 then increase the temparature to 72 and finally set it to 67",
-            "Press the left button on D-Pad but turn right at the next intersection."
-        ],
-        [
-            "What is 14 + 27? Press R3 if the answer is greater than 40, or L3 if it's less than 40.", 
-            "Text Message Alert (Read the following text out Loud): Hey, We are waiting for you here, how much longer for you to reach?",
-            "The capital of France is Paris. True or False? Press R2 for True and L2 for False",
-            "Come to a complete stop, wait for 2 seconds, then start driving again",
-            "Press Triangle to change the weather. Keep changing until you see rain and then change to any other weather preset"
-        ],
-        [
-            "Take a U Turn whenever possible, press the appropriate button on the D-Pad before turning in that direction",
-            "The sum of the angles in a triangle is 180 degrees. True or False? Press R2 for True and L2 for False",
-            "Park the car in a safe spot, wait for 5 seconds, then start driving again. Use left paddle shift to reverse car if necessary",
-            "Set the AC temparature to any number between 72 to 80, the number has to be an odd number",
-            "Press the Square Button on the steering wheel, and read out the current speed of vehicle"
-        ],
+            "This is where we will show you instructions for you to follow",
+            "Example: Turn Right Whenever possible",
+            "Come to a complete stop",
+            "Lets get Accustomed to the buttons we will use during the experiment.",
+            "Try to find and press R2 and L2 on the steering wheel",
+            "Try to find and press R3 and L3 on the steering wheel",
+            "Other buttons you should know before starting the experiment, D-Pad, Plus and Minus Buttons, Left Paddle"
+        ]
     ]
-    # instruction_display = InstructionDisplay(font, args.width, args.height)
-    # instruction_display.set_instructions(session_instructions[session_number - 1])
 
     start_time = time.time()  # Start time of the session
 
@@ -955,9 +914,9 @@ def game_loop(args, session_number):
 
         display = pygame.display.set_mode((0, 0), pygame.HWSURFACE | pygame.DOUBLEBUF)
         
-        logger = CSVLogger('car_inputs.csv')
+        # logger = CSVLogger('car_inputs.csv')
         hud = HUD(args.width, args.height)
-        world = World(client.get_world(), hud, args.filter, logger)
+        world = World(client.get_world(), hud, args.filter)
         controller = DualControl(world, args.autopilot)
 
 
@@ -972,29 +931,39 @@ def game_loop(args, session_number):
             if time.time() - start_time >= args.interval + 0.0 and time.time() - start_time <= args.interval + 1.0:
                 if count == 0:
                     world.hud.instruction(session_instructions[session_number - 1][0], args.duration)
-                    world.logger.log_instruction(session_instructions[session_number - 1][0])
+                    # world.logger.log_instruction(session_instructions[session_number - 1][0])
                     count = 1
             
             if time.time() - start_time >= args.interval * 2 + 0.0 and time.time() - start_time <= args.interval * 2  + 1.0:
                 if count == 0:
                     world.hud.instruction(session_instructions[session_number - 1][1], args.duration)
-                    world.logger.log_instruction(session_instructions[session_number - 1][1])
+                    # world.logger.log_instruction(session_instructions[session_number - 1][1])
                     count = 1
 
             if time.time() - start_time >= args.interval * 3 + 0.0 and time.time() - start_time <= args.interval * 3  + 1.0:
                 if count == 0:
                     world.hud.instruction(session_instructions[session_number - 1][2], args.duration)
-                    world.logger.log_instruction(session_instructions[session_number - 1][2])
+                    # world.logger.log_instruction(session_instructions[session_number - 1][2])
                     count = 1
             if time.time() - start_time >= args.interval * 4 + 0.0 and time.time() - start_time <= args.interval * 4  + 1.0:
                 if count == 0:
                     world.hud.instruction(session_instructions[session_number - 1][3], args.duration)
-                    world.logger.log_instruction(session_instructions[session_number - 1][3])
+                    # world.logger.log_instruction(session_instructions[session_number - 1][3])
                     count = 1
             if time.time() - start_time >= args.interval * 5 + 0.0 and time.time() - start_time <= args.interval * 5  + 1.0:
                 if count == 0:
                     world.hud.instruction(session_instructions[session_number - 1][4], args.duration)
-                    world.logger.log_instruction(session_instructions[session_number - 1][4])
+                    # world.logger.log_instruction(session_instructions[session_number - 1][4])
+                    count = 1
+            if time.time() - start_time >= args.interval * 6 + 0.0 and time.time() - start_time <= args.interval * 6  + 1.0:
+                if count == 0:
+                    world.hud.instruction(session_instructions[session_number - 1][5], args.duration)
+                    # world.logger.log_instruction(session_instructions[session_number - 1][4])
+                    count = 1
+            if time.time() - start_time >= args.interval * 7 + 0.0 and time.time() - start_time <= args.interval * 7  + 1.0:
+                if count == 0:
+                    world.hud.instruction(session_instructions[session_number - 1][6], args.duration)
+                    # world.logger.log_instruction(session_instructions[session_number - 1][4])
                     count = 1
 
             clock.tick_busy_loop(60)
@@ -1008,7 +977,7 @@ def game_loop(args, session_number):
 
         if world is not None:
             world.destroy()
-            logger.close()
+            # logger.close()
 
         pygame.quit()
 
@@ -1059,7 +1028,7 @@ def main():
     argparser.add_argument(
         '--session',
         metavar='SESSION_DURATION, INTERVAL, DURATION',
-        default='360, 60, 10',
+        default='300, 35, 8',
         help='actor filter (default: "300, 80, 10")')
     args = argparser.parse_args()
 
@@ -1099,14 +1068,14 @@ def main():
     """)
 
 
-    for session_number in range(1, 4):  # For three sessions
+    for session_number in range(1, 2):  # For three sessions
         if not prompt_for_session(session_number):
             print("Exiting the simulation. Thank you for playing!")
             sys.exit()
         print(f"\nStarting session {session_number}... Enjoy your drive!")
         game_loop(args, session_number)  # Call to your existing game loop function
         
-        if session_number < 3:
+        if session_number < 2:
             print("\nSession ended. Get ready for the next round!")
         else:
             print("\nAll sessions complete. Thank you for playing!")
