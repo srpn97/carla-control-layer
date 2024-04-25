@@ -297,6 +297,9 @@ class DualControl(object):
                 # elif event.button == 23:
                 #     world.camera_manager.next_sensor()
 
+            elif event.type == pygame.JOYHATMOTION:    # d-pad   {value,value}
+                world.logger.log_button_press('D-pad')
+
             elif event.type == pygame.KEYUP:
                 if self._is_quit_shortcut(event.key):
                     return True
@@ -850,9 +853,20 @@ class AirConditioner(object):
 # ==============================================================================
 # -- CSV Logger ----------------------------------------------------------------
 # ==============================================================================
-
 class CSVLogger:
-    def __init__(self, filename):
+    def __init__(self, filename_prefix):
+        self.filename_prefix = filename_prefix
+        self.file_number = 1
+        self.file = None
+        self.writer = None
+        self.create_new_file()
+
+    def create_new_file(self):
+        while True:
+            filename = f"{self.filename_prefix}_{self.file_number}.csv"
+            if not os.path.exists(filename):
+                break
+            self.file_number += 1
         self.file = open(filename, mode='w', newline='')
         self.writer = csv.writer(self.file)
         # Write the CSV header
@@ -871,7 +885,8 @@ class CSVLogger:
         self.writer.writerow([time.time(), 'button_press', '', '', '', '', '', button])
 
     def close(self):
-        self.file.close()
+        if self.file:
+            self.file.close()
 
 
 # ==============================================================================
@@ -955,7 +970,7 @@ def game_loop(args, session_number):
 
         display = pygame.display.set_mode((0, 0), pygame.HWSURFACE | pygame.DOUBLEBUF)
         
-        logger = CSVLogger('car_inputs.csv')
+        logger = CSVLogger('car_inputs')
         hud = HUD(args.width, args.height)
         world = World(client.get_world(), hud, args.filter, logger)
         controller = DualControl(world, args.autopilot)
@@ -1046,8 +1061,8 @@ def main():
         metavar='WIDTHxHEIGHT',
         # default='1280x720',
         # W: 3440 H: 1440
-        default='1534x1440',
-        # default='3440x1440',
+        # default='1534x864',
+        default='3440x1440',
         help='window resolution (default: 1280x720)')
 
     argparser.add_argument(

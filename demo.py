@@ -441,7 +441,8 @@ class HUD(object):
         mono = pygame.font.match_font(mono)
         self._font_mono = pygame.font.Font(mono, 12 if os.name == 'nt' else 14)
         self._notifications = FadingText(font, (width, 40), (0, height - 40))
-        self._instruction = Instructions(font, 300, (width - 320, 20))
+        instruction_font_size = 36
+        self._instruction = Instructions(font, 600, (width - 620, 20),  font_size=instruction_font_size)
         self.air_conditioner = AirConditioner(font, (width - 200, height - 50),)
         self.help = HelpText(pygame.font.Font(mono, 24), width, height)
         self.server_fps = 0
@@ -737,11 +738,12 @@ class CameraManager(object):
 
 
 class Instructions(object):
-    def __init__(self, font, width, pos):
-        self.font = font
+    def __init__(self, font, width, pos, font_size=24):
+        self.font = pygame.font.Font(font, font_size)
         self.width = width
         self.pos = pos
-        self.padding = 10
+        # self.padding = 10
+        self.padding = 20
         self.seconds_left = 0
         self.surface = None
 
@@ -1015,8 +1017,8 @@ def main():
         metavar='WIDTHxHEIGHT',
         # default='1280x720',
         # W: 3440 H: 1440
-        default='1534x1440',
-        # default='3440x1440',
+        # default='1534x864',
+        default='3440x1440',
         help='window resolution (default: 1280x720)')
 
     argparser.add_argument(
@@ -1028,7 +1030,7 @@ def main():
     argparser.add_argument(
         '--session',
         metavar='SESSION_DURATION, INTERVAL, DURATION',
-        default='300, 35, 8',
+        default='120, 15, 8',
         help='actor filter (default: "300, 80, 10")')
     args = argparser.parse_args()
 
