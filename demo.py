@@ -441,8 +441,9 @@ class HUD(object):
         mono = pygame.font.match_font(mono)
         self._font_mono = pygame.font.Font(mono, 12 if os.name == 'nt' else 14)
         self._notifications = FadingText(font, (width, 40), (0, height - 40))
-        instruction_font_size = 36
-        self._instruction = Instructions(font, 600, (width - 620, 20),  font_size=instruction_font_size)
+        instruction_font_size = 36  # Set the desired font size for instructions
+        instruction_font = pygame.font.Font(mono, instruction_font_size)  # Create a font object
+        self._instruction = Instructions(instruction_font, 600, (width - 620, 20))
         self.air_conditioner = AirConditioner(font, (width - 200, height - 50),)
         self.help = HelpText(pygame.font.Font(mono, 24), width, height)
         self.server_fps = 0
@@ -738,8 +739,8 @@ class CameraManager(object):
 
 
 class Instructions(object):
-    def __init__(self, font, width, pos, font_size=24):
-        self.font = pygame.font.Font(font, font_size)
+    def __init__(self, font, width, pos):
+        self.font = font
         self.width = width
         self.pos = pos
         # self.padding = 10
