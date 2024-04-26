@@ -35,6 +35,21 @@ try:
 except IndexError:
     pass
 
+# Get the directory of the current script
+# current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# # Get the name of the egg file (assuming it starts with "carla-")
+# egg_file = next((f for f in os.listdir(current_dir) if f.startswith("carla-") and f.endswith(".egg")), None)
+
+# if egg_file:
+#     # Construct the full path to the egg file
+#     egg_path = os.path.join(current_dir, egg_file)
+    
+#     # Append the egg path to the Python path
+#     sys.path.append(egg_path)
+# else:
+#     print("CARLA egg file not found in the current directory.")
+
 
 # ==============================================================================
 # -- imports -------------------------------------------------------------------
@@ -1020,6 +1035,7 @@ def main():
         # W: 3440 H: 1440
         # default='1534x864',
         default='3440x1440',
+        # default='1707x1067',
         help='window resolution (default: 1280x720)')
 
     argparser.add_argument(
@@ -1031,7 +1047,7 @@ def main():
     argparser.add_argument(
         '--session',
         metavar='SESSION_DURATION, INTERVAL, DURATION',
-        default='120, 15, 8',
+        default='300, 60, 8',
         help='actor filter (default: "300, 80, 10")')
     args = argparser.parse_args()
 

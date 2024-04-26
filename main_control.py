@@ -35,6 +35,21 @@ try:
 except IndexError:
     pass
 
+# Get the directory of the current script
+# current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# # Get the name of the egg file (assuming it starts with "carla-")
+# egg_file = next((f for f in os.listdir(current_dir) if f.startswith("carla-") and f.endswith(".egg")), None)
+
+# if egg_file:
+#     # Construct the full path to the egg file
+#     egg_path = os.path.join(current_dir, egg_file)
+    
+#     # Append the egg path to the Python path
+#     sys.path.append(egg_path)
+# else:
+#     print("CARLA egg file not found in the current directory.")
+
 
 # ==============================================================================
 # -- imports -------------------------------------------------------------------
@@ -404,12 +419,12 @@ class DualControl(object):
         if jsButtons[self._plus_button_idx]:
             if current_time - self._plus_button_last_press > debounce_time:
                 world.hud.changeTemp(True)
-                world.logger.log_button_press('Plus')
+                world.logger.log_button_press(1)
                 self._plus_button_last_press = current_time
         elif jsButtons[self._minus_button_idx]:
             if current_time - self._minus_button_last_press > debounce_time:
                 world.hud.changeTemp(False)
-                world.logger.log_button_press('Minus')
+                world.logger.log_button_press(0)
                 self._minus_button_last_press = current_time
 
     def _parse_walker_keys(self, keys, milliseconds):
@@ -449,7 +464,9 @@ class HUD(object):
         mono = pygame.font.match_font(mono)
         self._font_mono = pygame.font.Font(mono, 12 if os.name == 'nt' else 14)
         self._notifications = FadingText(font, (width, 40), (0, height - 40))
-        self._instruction = Instructions(font, 300, (width - 320, 20))
+        instruction_font_size = 36  # Set the desired font size for instructions
+        instruction_font = pygame.font.Font(mono, instruction_font_size)  # Create a font object
+        self._instruction = Instructions(instruction_font, 600, (width - 620, 20))
         self.air_conditioner = AirConditioner(font, (width - 200, height - 50),)
         self.help = HelpText(pygame.font.Font(mono, 24), width, height)
         self.server_fps = 0

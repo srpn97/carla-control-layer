@@ -45,13 +45,13 @@ def main():
     argparser.add_argument(
         '-n', '--number-of-vehicles',
         metavar='N',
-        default=60,
+        default=30,
         type=int,
         help='number of vehicles (default: 10)')
     argparser.add_argument(
         '-w', '--number-of-walkers',
         metavar='W',
-        default=150,
+        default=50,
         type=int,
         help='number of walkers (default: 50)')
     argparser.add_argument(
